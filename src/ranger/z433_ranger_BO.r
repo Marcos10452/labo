@@ -19,15 +19,15 @@ require("mlrMBO")
 
 
 
-kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
+kBO_iter  <- 1   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 
 #Estructura que define los hiperparámetros y sus rangos
 hs  <- makeParamSet(
-          makeIntegerParam("num.trees" ,        lower=  100L, upper= 1500L),  #la letra L al final significa ENTERO
-          makeIntegerParam("max.depth",         lower=    1L, upper=   30L),  # 0 significa profundidad infinita
-          makeIntegerParam("min.node.size" ,    lower=    1L, upper=  500L),
-          makeIntegerParam("mtry" ,             lower=    2L, upper=   50L))
+          makeIntegerParam("num.trees" ,        lower=  100L, upper= 100L),  #la letra L al final significa ENTERO
+          makeIntegerParam("max.depth",         lower=    10L, upper=   10L),  # 0 significa profundidad infinita
+          makeIntegerParam("min.node.size" ,    lower=    500L, upper=  500L),
+          makeIntegerParam("mtry" ,             lower=    13L, upper=   13L))
 
 
 ksemilla_azar  <- 757577  #Aqui poner la propia semilla
