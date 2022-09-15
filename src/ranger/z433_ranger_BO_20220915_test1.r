@@ -145,7 +145,7 @@ EstimarGanancia_ranger  <- function( x )
 #Aqui comienza el programa
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("~/buckets/b2/")   #Establezco el Working Directory
+setwd("~/buckets/b1/")   #Establezco el Working Directory
 #setwd("/home/marcos/DataScience/Curso/MdD/")
 
 #cargo el dataset donde voy a entrenar el modelo
