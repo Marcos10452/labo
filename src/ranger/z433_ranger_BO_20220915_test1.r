@@ -19,15 +19,15 @@ require("mlrMBO")
 
 
 
-kBO_iter  <- 1   #cantidad de iteraciones de la Optimizacion Bayesiana
+kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 
 #Estructura que define los hiperparámetros y sus rangos
 hs  <- makeParamSet(
-          makeIntegerParam("num.trees" ,        lower=  100L, upper= 2500L),  #la letra L al final significa ENTERO
-          makeIntegerParam("max.depth",         lower=    1L, upper=   30L),  # 0 significa profundidad infinita
-          makeIntegerParam("min.node.size" ,    lower=    1L, upper=  500L),
-          makeIntegerParam("mtry" ,             lower=    2L, upper=   50L))
+          makeIntegerParam("num.trees" ,        lower=  200L, upper= 900L),  #la letra L al final significa ENTERO
+          makeIntegerParam("max.depth",         lower=    10L, upper=   30L),  # 0 significa profundidad infinita
+          makeIntegerParam("min.node.size" ,    lower=    50L, upper=  500L),
+          makeIntegerParam("mtry" ,             lower=    10L, upper=   30L))
 
 
 ksemilla_azar  <- 757577  #Aqui poner la propia semilla
@@ -145,13 +145,14 @@ EstimarGanancia_ranger  <- function( x )
 #Aqui comienza el programa
 
 #Aqui se debe poner la carpeta de la computadora local
-#setwd("~/buckets/b1/")   #Establezco el Working Directory
-setwd("/home/marcos/DataScience/Curso/MdD/")
+setwd("~/buckets/b2/")   #Establezco el Working Directory
+#setwd("/home/marcos/DataScience/Curso/MdD/")
 
 #cargo el dataset donde voy a entrenar el modelo
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)   #donde entreno
+dataset  <- na.roughfix( dataset  )
 dataset  <- dataset[ foto_mes==202101 ]
-
+#dataset  <- dataset[1:5000, ]
 
 #creo la carpeta donde va el experimento
 # HT  representa  Hiperparameter Tuning

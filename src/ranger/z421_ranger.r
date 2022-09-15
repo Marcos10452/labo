@@ -13,8 +13,9 @@ require("ranger")
 require("randomForest")  #solo se usa para imputar nulos
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("~/buckets/b1/")   #Establezco el Working Directory
+#setwd("~/buckets/b1/")   #Establezco el Working Directory
 
+setwd("/home/marcos/DataScience/Curso/MdD/")
 #cargo los datos donde entreno
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)
 
@@ -23,18 +24,19 @@ dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)
 dataset  <- na.roughfix( dataset )
 
 dtrain  <- dataset[ foto_mes==202101 ]
+
 dapply  <- dataset[ foto_mes==202103 ]
 
 
 #genero el modelo de Random Forest con la libreria ranger
 #notar como la suma de muchos arboles contrarresta el efecto de min.node.size=1
-param  <- list( "num.trees"=       300,  #cantidad de arboles
-                "mtry"=             30,  #cantidad de variables que evalua para hacer un split  sqrt(ncol(dtrain))
-                "min.node.size"=  1500,  #tamaño minimo de las hojas
-                "max.depth"=        12   # 0 significa profundidad infinita
+param  <- list( "num.trees"=       729,  #cantidad de arboles
+                "mtry"=             23,  #cantidad de variables que evalua para hacer un split  sqrt(ncol(dtrain))
+                "min.node.size"=  227,  #tamaño minimo de las hojas
+                "max.depth"=        25   # 0 significa profundidad infinita
               )
 
-set.seed(102191) #Establezco la semilla aleatoria
+set.seed(757577) #Establezco la semilla aleatoria
 
 #para preparar la posibilidad de asignar pesos a las clases
 #la teoria de  Maite San Martin
@@ -63,7 +65,7 @@ entrega  <- as.data.table( list( "numero_de_cliente"= dapply[  , numero_de_clien
 # HT  representa  Hiperparameter Tuning
 dir.create( "./exp/",  showWarnings = FALSE ) 
 dir.create( "./exp/KA4210/", showWarnings = FALSE )
-archivo_salida  <- "./exp/KA4210/KA4210_001.csv"
+archivo_salida  <- "./exp/KA4210/KA4210_9151.csv"
 
 #genero el archivo para Kaggle
 fwrite( entrega, 

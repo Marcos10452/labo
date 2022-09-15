@@ -13,21 +13,6 @@ require("ranger")
 require("randomForest")  #solo se usa para imputar nulos
 require("parallel")
 
-#paquetes necesarios para la Bayesian Optimization
-require("DiceKriging")
-require("mlrMBO")
-
-
-
-kBO_iter  <- 1   #cantidad de iteraciones de la Optimizacion Bayesiana
-
-
-#Estructura que define los hiperparámetros y sus rangos
-hs  <- makeParamSet(
-          makeIntegerParam("num.trees" ,        lower=  100L, upper= 2500L),  #la letra L al final significa ENTERO
-          makeIntegerParam("max.depth",         lower=    1L, upper=   30L),  # 0 significa profundidad infinita
-          makeIntegerParam("min.node.size" ,    lower=    1L, upper=  500L),
-          makeIntegerParam("mtry" ,             lower=    2L, upper=   50L))
 
 
 ksemilla_azar  <- 757577  #Aqui poner la propia semilla
@@ -106,7 +91,7 @@ ranger_CrossValidation  <- function( data, param, pcampos_buenos, qfolds, pagrup
                           seq(qfolds), # 1 2 3 4 5  
                           MoreArgs= list( data, param), 
                           SIMPLIFY= FALSE,
-                          mc.cores= 5 )   #dejar esto en  1, porque ranger ya corre en paralelo
+                          mc.cores= 1 )   #dejar esto en  1, porque ranger ya corre en paralelo
 
   data[ , fold := NULL ]   #elimino el campo fold
 
@@ -145,23 +130,23 @@ EstimarGanancia_ranger  <- function( x )
 #Aqui comienza el programa
 
 #Aqui se debe poner la carpeta de la computadora local
-#setwd("~/buckets/b1/")   #Establezco el Working Directory
+#setwd("~/buckets/b1/")    #Establezco el Working Directory
 setwd("/home/marcos/DataScience/Curso/MdD/")
 
 #cargo el dataset donde voy a entrenar el modelo
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)   #donde entreno
-dataset  <- dataset[ foto_mes==202101 ]
-
+dataset  <- na.roughfix( dataset  )
+dataset  <- dataset[ foto_mes == 202101 ]
+dataset <-dataset[1:5000,]
 
 #creo la carpeta donde va el experimento
 # HT  representa  Hiperparameter Tuning
 dir.create( "./exp/",  showWarnings = FALSE ) 
-dir.create( "./exp/HT4330/", showWarnings = FALSE )
-setwd("./exp/HT4330/")   #Establezco el Working Directory DEL EXPERIMENTO
+dir.create( "./exp/HT4310/", showWarnings = FALSE )
+setwd("./exp/HT4310/")   #Establezco el Working Directory DEL EXPERIMENTO
 
-#en estos archivos quedan los resultados
-kbayesiana  <- "HT4330.RDATA"
-klog        <- "HT4330.txt"
+#en este archivo quedan el resultados
+klog        <- "HT4310.txt"
 
 
 GLOBAL_iteracion  <- 0   #inicializo la variable global
@@ -185,31 +170,15 @@ dataset[ , clase_ternaria := NULL ]  #elimino la clase_ternaria, ya no la necesi
 dataset  <- na.roughfix( dataset )
 
 
+#llamo con los valores default
+x  <- list( "num.trees" = 774,
+            #"max.depth" = NULL,
+            "max.depth" = 21,
+            #"min.node_size" = NULL,
+            "min.node_size" = 216,
+            #"mtry"= NULL
+            "mtry"= 22
+            )
 
-#Aqui comienza la configuracion de la Bayesian Optimization
-
-configureMlr( show.learner.output = FALSE)
-
-funcion_optimizar  <- EstimarGanancia_ranger
-
-#configuro la busqueda bayesiana,  los hiperparametros que se van a optimizar
-#por favor, no desesperarse por lo complejo
-obj.fun  <- makeSingleObjectiveFunction(
-              fn=       funcion_optimizar,
-              minimize= FALSE,   #estoy Maximizando la ganancia
-              noisy=    TRUE,
-              par.set=  hs,
-              has.simple.signature = FALSE
-             )
-
-ctrl  <- makeMBOControl( save.on.disk.at.time= 600,  save.file.path= kbayesiana)
-ctrl  <- setMBOControlTermination(ctrl, iters= kBO_iter )
-ctrl  <- setMBOControlInfill(ctrl, crit= makeMBOInfillCritEI())
-
-surr.km  <-  makeLearner("regr.km", predict.type= "se", covtype= "matern3_2", control= list(trace= TRUE))
-
-#inicio la optimizacion bayesiana
-if(!file.exists(kbayesiana)) {
-  run  <- mbo(obj.fun, learner = surr.km, control = ctrl)
-} else  run  <- mboContinue( kbayesiana )   #retomo en caso que ya exista
+EstimarGanancia_ranger( x )
 
