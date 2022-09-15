@@ -29,10 +29,14 @@ primero_ganador  <- 0
 for( i in 1:10000 ){  #diez mil experimentos
 
   vaciertos  <- mapply( ftirar, jugadores, 10 )  #10 tiros libres cada jugador
-
+  #which.max returns the position of the element with the maximal value in a vector.
   mejor  <- which.max( vaciertos )
   if( mejor == 1 )  primero_ganador  <- primero_ganador + 1
 }
 
 
 print(  primero_ganador )
+
+mejor
+
+0.7**10

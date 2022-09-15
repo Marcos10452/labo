@@ -100,3 +100,5 @@ veredicto
 
 #En el siguiente script veremos de hacer una Estimacion Montecarlo
 #De 10000 veces que el entrenador sigue esta estrategia, cuantas realmente le acierta
+
+

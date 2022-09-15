@@ -23,7 +23,7 @@ jugadores
 
 for( i in 1:10 ){
   vaciertos  <- mapply( ftirar, jugadores, 10 )  #cada jugador tira 10 tiros libres
-  mejor  <- which.max( vaciertos )
+  mejor  <- which.max( vaciertos ) #which.max returns the position of the element with the maximal value in a vector.
   aciertos_torneo  <- vaciertos[ mejor ]
 
   aciertos_segunda  <- ftirar( jugadores[ mejor ], 10 )

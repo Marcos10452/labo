@@ -9,7 +9,7 @@ require("rpart")
 require("rpart.plot")
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("~/buckets/b1/")  #Establezco el Working Directory
+setwd("/home/marcos/DataScience/Curso/MdD/")  #Establezco el Working Directory
 
 #cargo los datos donde entreno
 dataset  <- fread("./datasets/competencia1_2022.csv")
@@ -26,10 +26,10 @@ param_buenos  <- list( "cp"=         -1,
                        "minbucket"= 150,
                        "maxdepth"=    6 )
 
-num_trees         <-  20    #voy a generar 20 arboles, a mas arboles mas tiempo de proceso y MEJOR MODELO
+num_trees         <-  200    #voy a generar 20 arboles, a mas arboles mas tiempo de proceso y MEJOR MODELO
 feature_fraction  <-   0.5  #entreno cada arbol con solo 50% de las variables variables
 
-set.seed(102191) #Establezco la semilla aleatoria, cambiar por SU primer semilla
+set.seed(757577) #Establezco la semilla aleatoria, cambiar por SU primer semilla
 
 #inicializo en CERO el vector de las probabilidades en dapply
 #Aqui es donde voy acumulando, sumando, las probabilidades

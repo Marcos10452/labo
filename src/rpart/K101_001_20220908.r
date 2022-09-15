@@ -1,6 +1,3 @@
-#esqueleto de grid search
-#se espera que los alumnos completen lo que falta para recorrer TODOS cuatro los hiperparametros 
-
 rm( list=ls() )  #Borro todos los objetos
 gc()   #Garbage Collection
 
@@ -8,7 +5,10 @@ require("data.table")
 require("rpart")
 require("parallel")
 
-ksemillas  <- c(102191, 200177, 410551, 552581, 892237) #reemplazar por las propias semillas
+
+
+#ksemillas  <- c(757577) #reemplazar por las propias semillas
+ksemillas  <- c(757577, 333563, 135719, 101009, 531143 )
 
 #------------------------------------------------------------------------------
 #particionar agrega una columna llamada fold a un dataset que consiste en una particion estratificada segun agrupa
@@ -54,22 +54,11 @@ ArbolEstimarGanancia  <- function( semilla, param_basicos )
   #escalo la ganancia como si fuera todo el dataset
   ganancia_test_normalizada  <-  ganancia_test / 0.3
 
-  return( ganancia_test_normalizada )
-}
-#------------------------------------------------------------------------------
-
-ArbolesMontecarlo  <- function( semillas, param_basicos )
-{
-  #la funcion mcmapply  llama a la funcion ArbolEstimarGanancia  tantas veces como valores tenga el vector  ksemillas
-  ganancias  <- mcmapply( ArbolEstimarGanancia, 
-                          semillas,   #paso el vector de semillas, que debe ser el primer parametro de la funcion ArbolEstimarGanancia
-                          MoreArgs= list( param_basicos),  #aqui paso el segundo parametro
-                          SIMPLIFY= FALSE,
-                          mc.cores= 1 )  #se puede subir a 5 si posee Linux o Mac OS
-
-  ganancia_promedio  <- mean( unlist(ganancias) )
-
-  return( ganancia_promedio )
+  return( list( "testing"=       dataset[ fold==2, .N],
+                "testing_pos"=   dataset[ fold==2 & clase_ternaria=="BAJA+2", .N],
+                "envios"=        dataset[ fold==2 , sum( prediccion[ , "BAJA+2"] > 0.025)],
+                "aciertos"=      dataset[ fold==2, sum( prediccion[ , "BAJA+2"] > 0.025 & clase_ternaria=="BAJA+2" )],
+                "ganancia_test"= ganancia_test_normalizada ))
 }
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -84,46 +73,44 @@ dataset  <- fread("./datasets/competencia1_2022.csv")
 #trabajo solo con los datos con clase, es decir 202101
 dataset  <- dataset[ clase_ternaria!= "" ]
 
-#genero el archivo para Kaggle
-#creo la carpeta donde va el experimento
-# HT  representa  Hiperparameter Tuning
-dir.create( "./exp/",  showWarnings = FALSE ) 
-dir.create( "./exp/HT2020/", showWarnings = FALSE )
-archivo_salida  <- "./exp/HT2020/gridsearch.txt"
 
-#Escribo los titulos al archivo donde van a quedar los resultados
-#atencion que si ya existe el archivo, esta instruccion LO SOBREESCRIBE, y lo que estaba antes se pierde
-#la forma que no suceda lo anterior es con append=TRUE
-cat( file=archivo_salida,
-     sep= "",
-     "max_depth", "\t",
-     "min_split", "\t",
-     "ganancia_promedio", "\n")
+param_basicos  <- list( "cp"=         -1,  #complejidad minima
+                        "minsplit"=  90,  #minima cantidad de registros en un nodo para hacer el split
+                        "minbucket"=  20,  #minima cantidad de registros en una hoja
+                        "maxdepth"= 7 ) #profundidad máxima del arbol
+
+#Un solo llamado, con la semilla 17
+ArbolEstimarGanancia( 17, param_basicos )   
 
 
-#itero por los loops anidados para cada hiperparametro
+#la funcion mcmapply  llama a la funcion ArbolEstimarGanancia  tantas veces como valores tenga el vector  ksemillas
+salidas  <- mcmapply( ArbolEstimarGanancia, 
+                      ksemillas,   #paso el vector de semillas, que debe ser el primer parametro de la funcion ArbolEstimarGanancia
+                      MoreArgs= list( param_basicos),  #aqui paso el segundo parametro
+                      SIMPLIFY= FALSE,
+                      mc.cores= 5 )  #se puede subir a 5 si posee Linux o Mac OS
 
-for( vmax_depth  in  c( 4, 6, 8, 10, 12, 14 )  )
-{
-for( vmin_split  in  c( 1000, 800, 600, 400, 200, 100, 50, 20, 10 )  )
-{
+#muestro la lista de las salidas en testing para la particion realizada con cada semilla
+salidas
 
-  #notar como se agrega
-  param_basicos  <- list( "cp"=         -0.5,       #complejidad minima
-                          "minsplit"=  vmin_split,  #minima cantidad de registros en un nodo para hacer el split
-                          "minbucket"=  5,          #minima cantidad de registros en una hoja
-                          "maxdepth"=  vmax_depth ) #profundidad máxima del arbol
+#paso la lista a vector
+tb_salida  <- rbindlist(salidas)
 
-  #Un solo llamado, con la semilla 17
-  ganancia_promedio  <- ArbolesMontecarlo( ksemillas,  param_basicos )
+tb_salida
 
-  #escribo los resultados al archivo de salida
-  cat(  file=archivo_salida,
-        append= TRUE,
-        sep= "",
-        vmax_depth, "\t",
-        vmin_split, "\t",
-        ganancia_promedio, "\n"  )
+#finalmente calculo la media (promedio)  de las ganancias
+tb_salida[  , mean( ganancia_test ) ]
 
-}
-}
+#calculo todos los promedios
+tb_salida[  , lapply( .SD, mean ) ]
+
+
+
+
+
+
+
+
+
+
+

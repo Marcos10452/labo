@@ -35,9 +35,9 @@ particionar( dataset, division=c(7,3), agrupa="clase_ternaria", seed= 757577 )  
 
 
 param_basicos  <- list( "cp"=         0,  #complejidad minima
-                        "minsplit"=  10,  #minima cantidad de registros en un nodo para hacer el split
-                        "minbucket"=  2,  #minima cantidad de registros en una hoja
-                        "maxdepth"=  10 ) #profundidad máxima del arbol
+                        "minsplit"=  82,  #minima cantidad de registros en un nodo para hacer el split
+                        "minbucket"=  30,  #minima cantidad de registros en una hoja
+                        "maxdepth"=  6 ) #profundidad máxima del arbol
 
 #genero el modelo
 modelo  <- rpart("clase_ternaria ~ .",     #quiero predecir clase_ternaria a partir del resto
@@ -77,4 +77,6 @@ cat( "Estimulos: ", estimulos, "\n" )
 cat( "Aciertos (BAJA+2): ",  aciertos,  "\n" )
 
 cat( "Ganancia en testing (normalizada): ", ganancia_test_normalizada, "\n" )
+
+
 

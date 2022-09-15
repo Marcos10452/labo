@@ -5,7 +5,7 @@ require("data.table")
 require("rpart")
 require("parallel")
 
-ksemillas  <- c(102191, 200177, 410551, 552581, 892237 ) #reemplazar por las propias semillas
+ksemillas  <- c(757577, 333563, 135719, 101009, 531143 ) #reemplazar por las propias semillas
 
 #------------------------------------------------------------------------------
 #particionar agrega una columna llamada fold a un dataset que consiste en una particion estratificada segun agrupa
@@ -61,7 +61,7 @@ ArbolEstimarGanancia  <- function( semilla, param_basicos )
 #------------------------------------------------------------------------------
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("D:\\gdrive\\ITBA2022b\\")   #Establezco el Working Directory
+setwd("/home/marcos/DataScience/Curso/MdD/")   #Establezco el Working Directory
 #cargo los datos
 
 #cargo los datos

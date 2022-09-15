@@ -24,13 +24,13 @@ kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 #Estructura que define los hiperparámetros y sus rangos
 hs  <- makeParamSet(
-          makeIntegerParam("num.trees" ,        lower=  100L, upper= 2500L),  #la letra L al final significa ENTERO
+          makeIntegerParam("num.trees" ,        lower=  100L, upper= 1500L),  #la letra L al final significa ENTERO
           makeIntegerParam("max.depth",         lower=    1L, upper=   30L),  # 0 significa profundidad infinita
           makeIntegerParam("min.node.size" ,    lower=    1L, upper=  500L),
           makeIntegerParam("mtry" ,             lower=    2L, upper=   50L))
 
 
-ksemilla_azar  <- 102191  #Aqui poner la propia semilla
+ksemilla_azar  <- 757577  #Aqui poner la propia semilla
 
 #------------------------------------------------------------------------------
 #graba a un archivo los componentes de lista
@@ -106,7 +106,7 @@ ranger_CrossValidation  <- function( data, param, pcampos_buenos, qfolds, pagrup
                           seq(qfolds), # 1 2 3 4 5  
                           MoreArgs= list( data, param), 
                           SIMPLIFY= FALSE,
-                          mc.cores= 1 )   #dejar esto en  1, porque ranger ya corre en paralelo
+                          mc.cores= 5 )   #dejar esto en  1, porque ranger ya corre en paralelo
 
   data[ , fold := NULL ]   #elimino el campo fold
 
@@ -145,7 +145,8 @@ EstimarGanancia_ranger  <- function( x )
 #Aqui comienza el programa
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("~/buckets/b1/")   #Establezco el Working Directory
+#setwd("~/buckets/b1/")   #Establezco el Working Directory
+setwd("/home/marcos/DataScience/Curso/MdD/")
 
 #cargo el dataset donde voy a entrenar el modelo
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)   #donde entreno

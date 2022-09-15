@@ -122,3 +122,4 @@ tasa_eleccion_correcta
 #Esta estrategia elije al verdadero_mejor el 99% de las veces
 #pero lamentablemente necesita de un total de 36600   tiros libres
 
+
