@@ -19,18 +19,18 @@ require("mlrMBO")
 
 
 
-kBO_iter  <- 1   #cantidad de iteraciones de la Optimizacion Bayesiana
+kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 
 #Estructura que define los hiperparámetros y sus rangos
 hs  <- makeParamSet(
-          makeIntegerParam("num.trees" ,        lower=  100L, upper= 2500L),  #la letra L al final significa ENTERO
-          makeIntegerParam("max.depth",         lower=    1L, upper=   30L),  # 0 significa profundidad infinita
-          makeIntegerParam("min.node.size" ,    lower=    1L, upper=  500L),
-          makeIntegerParam("mtry" ,             lower=    2L, upper=   50L))
+  makeIntegerParam("num.trees" ,        lower=  100L, upper= 2500L),  #la letra L al final significa ENTERO
+  makeIntegerParam("max.depth",         lower=    1L, upper=   30L),  # 0 significa profundidad infinita
+  makeIntegerParam("min.node.size" ,    lower=    1L, upper=  500L),
+  makeIntegerParam("mtry" ,             lower=    2L, upper=   50L))
 
 
-ksemilla_azar  <- 757577  #Aqui poner la propia semilla
+ksemilla_azar  <- 102191  #Aqui poner la propia semilla
 
 #------------------------------------------------------------------------------
 #graba a un archivo los componentes de lista
@@ -40,20 +40,20 @@ loguear  <- function( reg, arch=NA, folder="./work/", ext=".txt", verbose=TRUE )
 {
   archivo  <- arch
   if( is.na(arch) )  archivo  <- paste0(  folder, substitute( reg ), ext )
-
+  
   if( !file.exists( archivo ) )  #Escribo los titulos
   {
     linea  <- paste0( "fecha\t", 
                       paste( list.names(reg), collapse="\t" ), "\n" )
-
+    
     cat( linea, file= archivo )
   }
-
+  
   linea  <- paste0( format(Sys.time(), "%Y%m%d %H%M%S"),  "\t",     #la fecha y hora
                     gsub( ", ", "\t", toString( reg ) ),  "\n" )
-
+  
   cat( linea, file= archivo, append= TRUE )  #grabo al archivo
-
+  
   if( verbose )  cat( linea )   #imprimo por pantalla
 }
 #------------------------------------------------------------------------------
@@ -64,20 +64,20 @@ loguear  <- function( reg, arch=NA, folder="./work/", ext=".txt", verbose=TRUE )
 particionar  <- function( data, division, agrupa="", campo="fold", start=1, seed=NA )
 {
   if( !is.na( seed)  )   set.seed( seed )
-
+  
   bloque  <- unlist( mapply(  function(x,y) { rep( y, x ) }, division, seq( from=start, length.out=length(division) )  ) )
-
+  
   data[ , (campo) :=  sample( rep( bloque, ceiling(.N/length(bloque))) )[1:.N],
-           by= agrupa ]
+        by= agrupa ]
 }
 #------------------------------------------------------------------------------
 
 ranger_Simple  <- function( fold_test, pdata, param )
 {
   #genero el modelo
-
+  
   set.seed(ksemilla_azar)
-
+  
   modelo  <- ranger( formula= "clase_binaria ~ .",
                      data=  pdata[ fold!= fold_test], 
                      probability=   TRUE,  #para que devuelva las probabilidades
@@ -85,14 +85,14 @@ ranger_Simple  <- function( fold_test, pdata, param )
                      mtry=          param$mtry,
                      min.node.size= param$min.node.size,
                      max.depth=     param$max.depth
-                 )
-
+  )
+  
   prediccion  <- predict( modelo, pdata[ fold == fold_test] )
-
+  
   ganancia_testing  <- pdata[ fold==fold_test,
                               sum( (prediccion$predictions[ ,"POS" ] > 1/40) *
-                                    ifelse( clase_binaria=="POS", 78000, -2000)  ) ]
-
+                                     ifelse( clase_binaria=="POS", 78000, -2000)  ) ]
+  
   return( ganancia_testing )
 }
 #------------------------------------------------------------------------------
@@ -101,19 +101,19 @@ ranger_CrossValidation  <- function( data, param, pcampos_buenos, qfolds, pagrup
 {
   divi  <- rep( 1, qfolds )
   particionar( data, divi, seed=semilla, agrupa=pagrupa )
-
+  
   ganancias  <- mcmapply( ranger_Simple, 
                           seq(qfolds), # 1 2 3 4 5  
                           MoreArgs= list( data, param), 
                           SIMPLIFY= FALSE,
-                          mc.cores= 5 )   #dejar esto en  1, porque ranger ya corre en paralelo
-
+                          mc.cores= 1 )   #dejar esto en  1, porque ranger ya corre en paralelo
+  
   data[ , fold := NULL ]   #elimino el campo fold
-
+  
   #devuelvo la ganancia promedio normalizada
   ganancia_promedio  <- mean( unlist( ganancias ) )
   ganancia_promedio_normalizada  <- ganancia_promedio * qfolds
-
+  
   return( ganancia_promedio_normalizada )
 }
 #------------------------------------------------------------------------------
@@ -122,31 +122,30 @@ ranger_CrossValidation  <- function( data, param, pcampos_buenos, qfolds, pagrup
 
 EstimarGanancia_ranger  <- function( x )
 {
-   GLOBAL_iteracion  <<- GLOBAL_iteracion + 1
-
-   xval_folds  <- 5   # 5-fold cross validation
-
-   ganancia  <- ranger_CrossValidation( dataset, 
-                                        param= x,
-                                        qfolds= xval_folds, 
-                                        pagrupa= "clase_binaria",
-                                        semilla= ksemilla_azar )
-
-   #logueo 
-   xx  <- x
-   xx$xval_folds  <-  xval_folds
-   xx$ganancia  <- ganancia
-   xx$iteracion  <- GLOBAL_iteracion
-   loguear( xx, arch= klog )
-
-   return( ganancia )
+  GLOBAL_iteracion  <<- GLOBAL_iteracion + 1
+  
+  xval_folds  <- 5   # 5-fold cross validation
+  
+  ganancia  <- ranger_CrossValidation( dataset, 
+                                       param= x,
+                                       qfolds= xval_folds, 
+                                       pagrupa= "clase_binaria",
+                                       semilla= ksemilla_azar )
+  
+  #logueo 
+  xx  <- x
+  xx$xval_folds  <-  xval_folds
+  xx$ganancia  <- ganancia
+  xx$iteracion  <- GLOBAL_iteracion
+  loguear( xx, arch= klog )
+  
+  return( ganancia )
 }
 #------------------------------------------------------------------------------
 #Aqui comienza el programa
 
 #Aqui se debe poner la carpeta de la computadora local
-#setwd("~/buckets/b1/")   #Establezco el Working Directory
-setwd("/home/marcos/DataScience/Curso/MdD/")
+setwd("~/buckets/b1/")   #Establezco el Working Directory
 
 #cargo el dataset donde voy a entrenar el modelo
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)   #donde entreno
@@ -195,12 +194,12 @@ funcion_optimizar  <- EstimarGanancia_ranger
 #configuro la busqueda bayesiana,  los hiperparametros que se van a optimizar
 #por favor, no desesperarse por lo complejo
 obj.fun  <- makeSingleObjectiveFunction(
-              fn=       funcion_optimizar,
-              minimize= FALSE,   #estoy Maximizando la ganancia
-              noisy=    TRUE,
-              par.set=  hs,
-              has.simple.signature = FALSE
-             )
+  fn=       funcion_optimizar,
+  minimize= FALSE,   #estoy Maximizando la ganancia
+  noisy=    TRUE,
+  par.set=  hs,
+  has.simple.signature = FALSE
+)
 
 ctrl  <- makeMBOControl( save.on.disk.at.time= 600,  save.file.path= kbayesiana)
 ctrl  <- setMBOControlTermination(ctrl, iters= kBO_iter )
@@ -212,4 +211,3 @@ surr.km  <-  makeLearner("regr.km", predict.type= "se", covtype= "matern3_2", co
 if(!file.exists(kbayesiana)) {
   run  <- mbo(obj.fun, learner = surr.km, control = ctrl)
 } else  run  <- mboContinue( kbayesiana )   #retomo en caso que ya exista
-
