@@ -145,13 +145,13 @@ EstimarGanancia_ranger  <- function( x )
 #Aqui comienza el programa
 
 #Aqui se debe poner la carpeta de la computadora local
-#setwd("~/buckets/b1/")   #Establezco el Working Directory
-setwd("/home/marcos/DataScience/Curso/MdD/")
+setwd("~/buckets/b1/")   #Establezco el Working Directory
+#setwd("/home/marcos/DataScience/Curso/MdD/")
 
 #cargo el dataset donde voy a entrenar el modelo
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)   #donde entreno
 dataset  <- dataset[ foto_mes==202101 ]
-dataset  <- dataset[ 1:10000, ]
+#dataset  <- dataset[ 1:10000, ]
 
 #creo la carpeta donde va el experimento
 # HT  representa  Hiperparameter Tuning
