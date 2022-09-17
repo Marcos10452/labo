@@ -19,15 +19,20 @@ require("mlrMBO")
 
 
 
-kBO_iter  <- 1   #cantidad de iteraciones de la Optimizacion Bayesiana
+kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 
 #Estructura que define los hiperparámetros y sus rangos
 hs  <- makeParamSet(
-          makeIntegerParam("num.trees" ,        lower=  200L, upper= 900L),  #la letra L al final significa ENTERO
+          makeIntegerParam("num.trees" ,        lower=  200L, upper= 1500L),  #la letra L al final significa ENTERO
           makeIntegerParam("max.depth",         lower=    10L, upper=   30L),  # 0 significa profundidad infinita
-          makeIntegerParam("min.node.size" ,    lower=    50L, upper=  500L),
-          makeIntegerParam("mtry" ,             lower=    10L, upper=   30L))
+          makeIntegerParam("min.node.size" ,    lower=    50L, upper=  1000L),
+          makeIntegerParam("mtry" ,             lower=    1L, upper=   30L))
+#makeIntegerParam("num.trees" ,        lower=  710L, upper= 710L),  #la letra L al final significa ENTERO
+#makeIntegerParam("max.depth",         lower=    30L, upper=   30L),  # 0 significa profundidad infinita
+#makeIntegerParam("min.node.size" ,    lower=    500L, upper=  500L),
+#makeIntegerParam("mtry" ,             lower=    12L, upper=   12L))
+
 
 
 ksemilla_azar  <- 757577  #Aqui poner la propia semilla
@@ -152,12 +157,12 @@ setwd("/home/marcos/DataScience/Curso/MdD/")
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)   #donde entreno
 dataset  <- na.roughfix( dataset  )
 dataset  <- dataset[ foto_mes==202101 ]
-dataset  <- dataset[1:5000, ]
+dataset  <- dataset[1000:6000, ]
 
 #creo la carpeta donde va el experimento
 # HT  representa  Hiperparameter Tuning
 dir.create( "./exp/",  showWarnings = FALSE ) 
-dir.create( "./exp/HT4330/", showWarnings = FALSE )
+dir.create( "./exp/HT4330/", showWarnings = TRUE )
 setwd("./exp/HT4330/")   #Establezco el Working Directory DEL EXPERIMENTO
 
 #en estos archivos quedan los resultados
@@ -213,4 +218,6 @@ surr.km  <-  makeLearner("regr.km", predict.type= "se", covtype= "matern3_2", co
 if(!file.exists(kbayesiana)) {
   run  <- mbo(obj.fun, learner = surr.km, control = ctrl)
 } else  run  <- mboContinue( kbayesiana )   #retomo en caso que ya exista
+# ATENCION son prubas y solamente corro la opt Bayesiana sin verificar el archivo
+#run  <- mbo(obj.fun, learner = surr.km, control = ctrl)
 

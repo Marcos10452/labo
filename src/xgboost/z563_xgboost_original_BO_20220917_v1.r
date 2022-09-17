@@ -1,5 +1,12 @@
-# Este script esta pensado para correr en la PC local 
+# Este script esta pensado para correr en Google Cloud
+#    8 vCPU
+#   16 GB memoria RAM
+#  256 GB disco
+# eliminar la vm cuando termine de correr
+
+# Optimizacion Bayesiana de hiperparametros de  xgboost, con el metodo TRADICIONAL de los hiperparametros originales de xgboost
 # 5-fold cross validation
+# la probabilidad de corte es un hiperparametro
 
 #limpio la memoria
 rm( list=ls() )  #remove all objects
@@ -10,8 +17,23 @@ require("rlist")
 
 require("xgboost")
 
+#paquetes necesarios para la Bayesian Optimization
+require("DiceKriging")
+require("mlrMBO")
 
-ksemilla_azar  <- 102191  #Aqui poner la propia semilla
+
+kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
+
+#Aqui se cargan los hiperparametros
+hs <- makeParamSet( 
+         makeNumericParam("eta",              lower=  0.01 , upper=    0.3),   #equivalente a learning rate
+         makeNumericParam("colsample_bytree", lower=  0.2  , upper=    1.0),   #equivalente a feature_fraction
+         makeIntegerParam("min_child_weight", lower=  0L   , upper=   10L),    #groseramente equivalente a  min_data_in_leaf
+         makeIntegerParam("max_depth",        lower=  2L   , upper=   30L),    #profundidad del arbol, NO es equivalente a num_leaves
+         makeNumericParam("prob_corte",       lower= 1/80 , upper=  1/15)     #pruebo  cortar con otras probabilidades
+        )
+
+ksemilla_azar  <- 757577  #Aqui poner la propia semilla
 
 #------------------------------------------------------------------------------
 #graba a un archivo los componentes de lista
@@ -119,8 +141,8 @@ EstimarGanancia_xgboost  <- function( x )
 #Aqui empieza el programa
 
 #Aqui se debe poner la carpeta de la computadora local
-#setwd("~/buckets/b1/")   #Establezco el Working Directory
-setwd("/home/marcos/DataScience/Curso/MdD/")
+setwd("~/buckets/b1/")   #Establezco el Working Directory
+#setwd("/home/marcos/DataScience/Curso/MdD/")
 
 #cargo el dataset donde voy a entrenar el modelo
 dataset  <- fread("./datasets/competencia1_2022.csv")
@@ -128,12 +150,13 @@ dataset  <- fread("./datasets/competencia1_2022.csv")
 #creo la carpeta donde va el experimento
 # HT  representa  Hiperparameter Tuning
 dir.create( "./exp/",  showWarnings = FALSE ) 
-dir.create( "./exp/HT5620/", showWarnings = FALSE )
-setwd("./exp/HT5620/")   #Establezco el Working Directory DEL EXPERIMENTO
+dir.create( "./exp/HT5630/", showWarnings = FALSE )
+setwd("./exp/HT5630/")   #Establezco el Working Directory DEL EXPERIMENTO
 
 
 #en estos archivos quedan los resultados
-klog        <- "HT5620.txt"
+kbayesiana  <- "HT5630.RDATA"
+klog        <- "HT5630.txt"
 
 
 GLOBAL_iteracion  <- 0   #inicializo la variable global
@@ -148,24 +171,44 @@ if( file.exists(klog) )
 
 
 #paso la clase a binaria que tome valores {0,1}  enteros
-dataset[ foto_mes==202101, clase01 := ifelse( clase_ternaria=="BAJA+2", 1L, 0L) ]
+dataset[ foto_mes==202101 , clase01 := ifelse( clase_ternaria=="BAJA+2", 1L, 0L) ]
 
 
 #los campos que se van a utilizar
 campos_buenos  <- setdiff( colnames(dataset), c("clase_ternaria","clase01") )
-
 
 #dejo los datos en el formato que necesita LightGBM
 dtrain  <- xgb.DMatrix( data=  data.matrix(  dataset[ foto_mes==202101, campos_buenos, with=FALSE]),
                         label= dataset[ foto_mes==202101, clase01 ] )
 
 
-#llamo con los parametros por default
-x  <- list( eta=               0.3,
-            colsample_bytree=  1.0,
-            min_child_weight=  1.0,
-            max_depth=         6,
-            prob_corte=        1/60
-          )
 
-EstimarGanancia_xgboost( x ) 
+#Aqui comienza la configuracion de la Bayesian Optimization
+funcion_optimizar  <- EstimarGanancia_xgboost   #la funcion que voy a maximizar
+
+configureMlr( show.learner.output= FALSE)
+
+#configuro la busqueda bayesiana,  los hiperparametros que se van a optimizar
+#por favor, no desesperarse por lo complejo
+obj.fun  <- makeSingleObjectiveFunction(
+              fn=       funcion_optimizar, #la funcion que voy a maximizar
+              minimize= FALSE,   #estoy Maximizando la ganancia
+              noisy=    TRUE,
+              par.set=  hs,     #definido al comienzo del programa
+              has.simple.signature = FALSE   #paso los parametros en una lista
+             )
+
+ctrl  <- makeMBOControl( save.on.disk.at.time= 600,  save.file.path= kbayesiana)  #se graba cada 600 segundos
+ctrl  <- setMBOControlTermination(ctrl, iters= kBO_iter )   #cantidad de iteraciones
+ctrl  <- setMBOControlInfill(ctrl, crit= makeMBOInfillCritEI() )
+
+#establezco la funcion que busca el maximo
+surr.km  <- makeLearner("regr.km", predict.type= "se", covtype= "matern3_2", control= list(trace= TRUE))
+
+#inicio la optimizacion bayesiana
+if( !file.exists( kbayesiana ) ) {
+  run  <- mbo(obj.fun, learner= surr.km, control= ctrl)
+} else {
+  run  <- mboContinue( kbayesiana )   #retomo en caso que ya exista
+}
+

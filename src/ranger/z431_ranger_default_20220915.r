@@ -137,7 +137,7 @@ setwd("/home/marcos/DataScience/Curso/MdD/")
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)   #donde entreno
 dataset  <- na.roughfix( dataset  )
 dataset  <- dataset[ foto_mes == 202101 ]
-dataset <-dataset[1:5000,]
+#dataset <-dataset[1:5000,]
 
 #creo la carpeta donde va el experimento
 # HT  representa  Hiperparameter Tuning
@@ -171,13 +171,13 @@ dataset  <- na.roughfix( dataset )
 
 
 #llamo con los valores default
-x  <- list( "num.trees" = 774,
+x  <- list( "num.trees" = 937,
             #"max.depth" = NULL,
-            "max.depth" = 21,
+            "max.depth" = 38,
             #"min.node_size" = NULL,
-            "min.node_size" = 216,
+            "min.node_size" = 250,
             #"mtry"= NULL
-            "mtry"= 22
+            "mtry"= 5
             )
 
 EstimarGanancia_ranger( x )
