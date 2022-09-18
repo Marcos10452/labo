@@ -8,7 +8,8 @@ require("data.table")
 require("lightgbm")
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("~/buckets/b1/")   #Establezco el Working Directory
+#setwd("~/buckets/b1/")   #Establezco el Working Directory
+setwd("/home/marcos/DataScience/Curso/MdD/")
 
 #cargo el dataset donde voy a entrenar
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)

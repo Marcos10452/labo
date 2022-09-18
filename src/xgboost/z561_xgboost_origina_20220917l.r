@@ -10,7 +10,6 @@ require("xgboost")
 #Aqui se debe poner la carpeta de la computadora local
 #setwd("~/buckets/b1/")   #Establezco el Working Directory
 setwd("/home/marcos/DataScience/Curso/MdD/")
-
 #cargo el dataset donde voy a entrenar
 dataset  <- fread("./datasets/competencia1_2022.csv", stringsAsFactors= TRUE)
 
@@ -28,19 +27,24 @@ dtrain  <- xgb.DMatrix( data= data.matrix(  dataset[ foto_mes==202101 , campos_b
 
 #genero el modelo con los parametros por default
 modelo  <- xgb.train( data= dtrain,
-                      param= list( objective=       "binary:logistic",
-                                   max_depth=           6,
-                                   min_child_weight=    1,
-                                   eta=                 0.3,
-                                   colsample_bytree=    1.0,
-                                   gamma=               0.0,
-                                   alpha=               0.0,
-                                   lambda=              0.0,
-                                   subsample=           1.0,
-                                   scale_pos_weight=    1.0
+                      param= list(objective=       "binary:logistic",
+                                  gamma=               0.0,
+                                  alpha=               0.0,
+                                  lambda=              0.0,
+                                  subsample=           1.0,
+                                  #three_method="auto",
+                                  grow_policy="depthwise",
+                                  max_bin= 256,
+                                  max_leaves= 0,
+                                  scale_pos_weight=    1.0,
+                                  eta=	0.01006,
+                                  colsample_bytree=	0.23048,
+                                  min_child_weight=	0,
+                                  max_depth=	2
+  
                                    ),
                       #base_score= mean( getinfo(dtrain, "label")),
-                      nrounds= 34
+                      nrounds= 2602
                     )
 
 
@@ -51,11 +55,11 @@ prediccion  <- predict( modelo,
 
 #Genero la entrega para Kaggle
 entrega  <- as.data.table( list( "numero_de_cliente"= dataset[ foto_mes==202103, numero_de_cliente],
-                                 "Predicted"= as.integer( prediccion > 1/40 ) )  ) #genero la salida
+                                 "Predicted"= as.integer( prediccion > 0.01923 ) )  ) #genero la salida
 
 dir.create( "./exp/",  showWarnings = FALSE ) 
 dir.create( "./exp/KA5610/", showWarnings = FALSE )
-archivo_salida  <- "./exp/KA5610/KA5610_001.csv"
+archivo_salida  <- "./exp/KA5610/KA5610_003.csv"
 
 #genero el archivo para Kaggle
 fwrite( entrega, 
