@@ -31,12 +31,13 @@ dtrain  <- lgb.Dataset( data= data.matrix(  dataset[ foto_mes==202101, campos_bu
 modelo  <- lgb.train( data= dtrain,
                       param= list( objective=        "binary",
                                    max_bin=             31,
-                                   learning_rate=        0.0366,
-                                   num_iterations=      510,
-                                   feature_fraction=     0.5,
-                                   min_data_in_leaf=  3077,
-                                   num_leaves=          17,
-                                   seed=            999983 )  )
+                                   num_iterations=      508,
+                                   seed=            999983,
+                                   learning_rate=        0.0368,
+                                   feature_fraction=     0.4922,
+                                   min_data_in_leaf=  3076,
+                                   num_leaves=          16
+                                   )  )
 
 
 #aplico el modelo a los datos nuevos
@@ -46,11 +47,11 @@ prediccion  <- predict( modelo,
 
 #Genero la entrega para Kaggle
 entrega  <- as.data.table( list( "numero_de_cliente"= dataset[ foto_mes==202103, numero_de_cliente],
-                                 "Predicted"= as.integer(prediccion > 0.02397 ) )  ) #genero la salida
+                                 "Predicted"= as.integer(prediccion > 0.02478) )  ) #genero la salida
 
 dir.create( "./exp/",  showWarnings = FALSE ) 
 dir.create( "./exp/KA5120/", showWarnings = FALSE )
-archivo_salida  <- "./exp/KA5120/KA5120_001.csv"
+archivo_salida  <- "./exp/KA5120/KA5120_005.csv"
 
 #genero el archivo para Kaggle
 fwrite( entrega, 
@@ -60,7 +61,7 @@ fwrite( entrega,
 
 #ahora imprimo la importancia de variables
 tb_importancia  <-  as.data.table( lgb.importance(modelo) ) 
-archivo_importancia  <- "./exp/KA5120/5120_importancia_001.txt"
+archivo_importancia  <- "./exp/KA5120/5120_importancia_005.txt"
 
 fwrite( tb_importancia, 
         file= archivo_importancia, 
