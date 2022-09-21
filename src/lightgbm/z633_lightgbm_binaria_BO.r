@@ -31,16 +31,22 @@ options(error = function() {
 
 kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
 
+# ATENCION  si NO se quiere utilizar  undersampling  se debe  usar  kundersampling <- 1.0
+kundersampling  <- 1.0   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
+
+prob_min  <- 0.5/( 1 + kundersampling*39)
+prob_max  <- pmin( 1.0, 4/( 1 + kundersampling*39) )
+
 #Aqui se cargan los hiperparametros
 hs <- makeParamSet( 
-         makeNumericParam("learning_rate",    lower=  0.01 , upper=    0.3),
-         makeNumericParam("feature_fraction", lower=  0.2  , upper=    1.0),
-         makeIntegerParam("min_data_in_leaf", lower=  0    , upper= 8000),
-         makeIntegerParam("num_leaves",       lower= 16L   , upper= 1024L),
-         makeNumericParam("prob_corte",       lower= 1/80  , upper=  1/15)  #esto sera visto en clase en gran detalle
+         makeNumericParam("learning_rate",    lower=  0.01   , upper=    0.3),
+         makeNumericParam("feature_fraction", lower=  0.2    , upper=    1.0),
+         makeIntegerParam("min_data_in_leaf", lower=  0      , upper= 8000),
+         makeIntegerParam("num_leaves",       lower= 16L     , upper= 1024L),
+         makeNumericParam("prob_corte",       lower= prob_min, upper= prob_max  )  #esto sera visto en clase en gran detalle
         )
 
-kdataset       <- "./exp/FE6110/dataset_6110.csv.gz"
+kdataset       <- "./exp/FE6110/dataset_6110.csv.gz"         # El dataset generado con Feature Engineering
 ksemilla_azar  <- 102191  #Aqui poner la propia semilla
 kexperimento   <- "HT6330"
 ktraining      <- c( 202101 )   #periodos en donde entreno
@@ -81,7 +87,8 @@ fganancia_logistic_lightgbm   <- function( probs, datos)
   vpesos   <- get_field(datos, "weight")
 
   gan  <- sum( (probs > PROB_CORTE  ) *
-               ifelse( vpesos > 1.0, kPOS_ganancia, kNEG_ganancia ) )
+               ifelse( vpesos == 1.0000002, kPOS_ganancia, 
+                       ifelse( vpesos == 1.0000001, kNEG_ganancia, kNEG_ganancia / kundersampling ) ) )
 
 
   return( list( "name"= "ganancia", 
@@ -150,7 +157,7 @@ EstimarGanancia_lightgbm  <- function( x )
   xx$iteracion <- GLOBAL_iteracion
   loguear( xx, arch= klog )
 
-  return( ganancia )
+  return( ganancia_normalizada )
 }
 #------------------------------------------------------------------------------
 #Aqui empieza el programa
@@ -188,12 +195,17 @@ dataset[ foto_mes %in% ktraining, clase01 := ifelse( clase_ternaria=="CONTINUA",
 
 
 #los campos que se van a utilizar
-campos_buenos  <- setdiff( colnames(dataset), c("clase_ternaria","clase01") )
+campos_buenos  <- setdiff( colnames(dataset), c("clase_ternaria","clase01", "azar", "training" ) )
+
+set.seed( ksemilla_azar )
+dataset[  , azar := runif( nrow( dataset ) ) ]
+dataset[  , training := 0L ]
+dataset[ foto_mes %in% ktraining & ( azar <= kundersampling | clase_ternaria %in% c( "BAJA+1", "BAJA+2" ) ), training := 1L ]
 
 #dejo los datos en el formato que necesita LightGBM
-dtrain  <- lgb.Dataset( data= data.matrix(  dataset[ foto_mes %in% ktraining, campos_buenos, with=FALSE]),
-                        label= dataset[ foto_mes %in% ktraining, clase01 ],
-                        weight=  dataset[ foto_mes %in% ktraining, ifelse( clase_ternaria=="BAJA+2", 1.0000001, 1.0)],
+dtrain  <- lgb.Dataset( data= data.matrix(  dataset[ training == 1L, campos_buenos, with=FALSE]),
+                        label= dataset[ training == 1L, clase01 ],
+                        weight=  dataset[ training == 1L, ifelse( clase_ternaria=="BAJA+2", 1.0000002, ifelse( clase_ternaria=="BAJA+1",  1.0000001, 1.0) )],
                         free_raw_data= FALSE  )
 
 
