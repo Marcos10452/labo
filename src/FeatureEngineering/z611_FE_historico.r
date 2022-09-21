@@ -20,7 +20,90 @@ options(error = function() {
 
 #------------------------------------------------------------------------------
 
-Corregir  <- function( dataset )
+CorregirCampoMes  <- function( pcampo, pmeses )
+{
+  tbl <- dataset[  ,  list( "v1" = shift( get(pcampo), 1, type="lag" ),
+                            "v2" = shift( get(pcampo), 1, type="lead" )
+                         ), 
+                   by=numero_de_cliente ]
+  
+  tbl[ , numero_de_cliente := NULL ]
+  tbl[ , promedio := rowMeans( tbl,  na.rm=TRUE ) ]
+  
+  dataset[ ,  
+           paste0(pcampo) := ifelse( !(foto_mes %in% pmeses),
+                                     get( pcampo),
+                                     tbl$promedio ) ]
+}
+#------------------------------------------------------------------------------
+# reemplaza cada variable ROTA  (variable, foto_mes)  con el promedio entre  ( mes_anterior, mes_posterior )
+# en honor a Velen Pennini,  honorable y fiel centinela de la Estadistica Clasica
+
+Corregir_VelenPennini  <- function( dataset )
+{
+  CorregirCampoMes( "thomebanking", c(201801,202006) )
+  CorregirCampoMes( "chomebanking_transacciones", c(201801, 201910, 202006) )
+  CorregirCampoMes( "tcallcenter", c(201801, 201806, 202006) )
+  CorregirCampoMes( "ccallcenter_transacciones", c(201801, 201806, 202006) )
+  CorregirCampoMes( "cprestamos_personales", c(201801,202006) )
+  CorregirCampoMes( "mprestamos_personales", c(201801,202006) )
+  CorregirCampoMes( "mprestamos_hipotecarios", c(201801,202006) )
+  CorregirCampoMes( "ccajas_transacciones", c(201801,202006) )
+  CorregirCampoMes( "ccajas_consultas", c(201801,202006) )
+  CorregirCampoMes( "ccajas_depositos", c(201801,202006) )
+  CorregirCampoMes( "ccajas_extracciones", c(201801,202006) )
+  CorregirCampoMes( "ccajas_otras", c(201801,202006) )
+
+  CorregirCampoMes( "ctarjeta_visa_debitos_automaticos", c(201904) )
+  CorregirCampoMes( "mttarjeta_visa_debitos_automaticos", c(201904,201905) )
+  CorregirCampoMes( "Visa_mfinanciacion_limite", c(201904) )
+
+  CorregirCampoMes( "mrentabilidad", c(201905, 201910, 202006) )
+  CorregirCampoMes( "mrentabilidad_annual", c(201905, 201910, 202006) )
+  CorregirCampoMes( "mcomisiones", c(201905, 201910, 202006) )
+  CorregirCampoMes( "mpasivos_margen", c(201905, 201910, 202006) )
+  CorregirCampoMes( "mactivos_margen", c(201905, 201910, 202006) )
+  CorregirCampoMes( "ccomisiones_otras", c(201905, 201910, 202006) )
+  CorregirCampoMes( "mcomisiones_otras", c(201905, 201910, 202006) )
+
+  CorregirCampoMes( "ctarjeta_visa_descuentos", c(201910) )
+  CorregirCampoMes( "ctarjeta_master_descuentos", c(201910) )
+  CorregirCampoMes( "mtarjeta_visa_descuentos", c(201910) )
+  CorregirCampoMes( "mtarjeta_master_descuentos", c(201910) )
+  CorregirCampoMes( "ccajeros_propios_descuentos", c(201910) )
+  CorregirCampoMes( "mcajeros_propios_descuentos", c(201910) )
+
+  CorregirCampoMes( "cliente_vip", c(201911) )
+
+  CorregirCampoMes( "active_quarter", c(202006) )
+  CorregirCampoMes( "mcuentas_saldo", c(202006) )
+  CorregirCampoMes( "ctarjeta_debito_transacciones", c(202006) )
+  CorregirCampoMes( "mautoservicio", c(202006) )
+  CorregirCampoMes( "ctarjeta_visa_transacciones", c(202006) )
+  CorregirCampoMes( "ctarjeta_visa_transacciones", c(202006) )
+  CorregirCampoMes( "cextraccion_autoservicio", c(202006) )
+  CorregirCampoMes( "mextraccion_autoservicio", c(202006) )
+  CorregirCampoMes( "ccheques_depositados", c(202006) )
+  CorregirCampoMes( "mcheques_depositados", c(202006) )
+  CorregirCampoMes( "mcheques_emitidos", c(202006) )
+  CorregirCampoMes( "mcheques_emitidos", c(202006) )
+  CorregirCampoMes( "ccheques_depositados_rechazados", c(202006) )
+  CorregirCampoMes( "mcheques_depositados_rechazados", c(202006) )
+  CorregirCampoMes( "ccheques_emitidos_rechazados", c(202006) )
+  CorregirCampoMes( "mcheques_emitidos_rechazados", c(202006) )
+  CorregirCampoMes( "catm_trx", c(202006) )
+  CorregirCampoMes( "matm", c(202006) )
+  CorregirCampoMes( "catm_trx_other", c(202006) )
+  CorregirCampoMes( "matm_other", c(202006) )
+  CorregirCampoMes( "tmobile_app", c(202006) )
+  CorregirCampoMes( "cmobile_app_trx", c(202006) )
+
+  CorregirCampoMes( "internet",    c(201801, 202006, 202010, 202011, 202012, 202101, 202102, 202103) )
+  CorregirCampoMes( "tmobile_app", c(202006, 202009, 202010, 202011, 202012, 202101, 202102, 202103) )
+}
+#------------------------------------------------------------------------------
+
+Corregir_MachineLearning  <- function( dataset )
 {
   gc()
   #acomodo los errores del dataset
@@ -37,7 +120,7 @@ Corregir  <- function( dataset )
   dataset[ foto_mes==201904,  ctransferencias_recibidas  := NA ]
   dataset[ foto_mes==201904,  mtransferencias_recibidas  := NA ]
   dataset[ foto_mes==201904,  ctarjeta_visa_debitos_automaticos  :=  NA ]
-  dataset[ foto_mes==201904,  mtarjeta_visa_debitos_automaticos := NA ]
+  dataset[ foto_mes==201904,  mttarjeta_visa_debitos_automaticos := NA ]
   dataset[ foto_mes==201904,  Visa_mfinanciacion_limite := NA ]
 
   dataset[ foto_mes==201905,  ctransferencias_recibidas  := NA ]
@@ -58,7 +141,7 @@ Corregir  <- function( dataset )
   dataset[ foto_mes==201910,  mcomisiones       := NA ]
   dataset[ foto_mes==201910,  mrentabilidad     := NA ]
   dataset[ foto_mes==201910,  mrentabilidad_annual        := NA ]
-  dataset[ foto_mes==201910,  chomebanking_trx  := NA ]
+  dataset[ foto_mes==201910,  chomebanking_transacciones  := NA ]
   dataset[ foto_mes==201910,  ctarjeta_visa_descuentos    := NA ]
   dataset[ foto_mes==201910,  ctarjeta_master_descuentos  := NA ]
   dataset[ foto_mes==201910,  mtarjeta_visa_descuentos    := NA ]
@@ -76,11 +159,11 @@ Corregir  <- function( dataset )
   dataset[ foto_mes==202006,  mactivos_margen   := NA ]
   dataset[ foto_mes==202006,  mpasivos_margen   := NA ]
   dataset[ foto_mes==202006,  mcuentas_saldo   := NA ]
-  dataset[ foto_mes==202006,  ctarjeta_debito_trx   := NA ]
+  dataset[ foto_mes==202006,  ctarjeta_debito_transacciones  := NA ]
   dataset[ foto_mes==202006,  mautoservicio   := NA ]
-  dataset[ foto_mes==202006,  ctarjeta_visa_trx   := NA ]
+  dataset[ foto_mes==202006,  ctarjeta_visa_transacciones   := NA ]
   dataset[ foto_mes==202006,  mtarjeta_visa_consumo   := NA ]
-  dataset[ foto_mes==202006,  ctarjeta_master_trx   := NA ]
+  dataset[ foto_mes==202006,  ctarjeta_master_transacciones  := NA ]
   dataset[ foto_mes==202006,  mtarjeta_master_consumo   := NA ]
   dataset[ foto_mes==202006,  ccomisiones_otras   := NA ]
   dataset[ foto_mes==202006,  mcomisiones_otras   := NA ]
@@ -95,10 +178,10 @@ Corregir  <- function( dataset )
   dataset[ foto_mes==202006,  ccheques_emitidos_rechazados   := NA ]
   dataset[ foto_mes==202006,  mcheques_emitidos_rechazados   := NA ]
   dataset[ foto_mes==202006,  tcallcenter   := NA ]
-  dataset[ foto_mes==202006,  ccallcenter_trx   := NA ]
+  dataset[ foto_mes==202006,  ccallcenter_transacciones   := NA ]
   dataset[ foto_mes==202006,  thomebanking   := NA ]
-  dataset[ foto_mes==202006,  chomebanking_trx   := NA ]
-  dataset[ foto_mes==202006,  ccajas_trx   := NA ]
+  dataset[ foto_mes==202006,  chomebanking_transacciones   := NA ]
+  dataset[ foto_mes==202006,  ccajas_transacciones   := NA ]
   dataset[ foto_mes==202006,  ccajas_consultas   := NA ]
   dataset[ foto_mes==202006,  ccajas_depositos   := NA ]
   dataset[ foto_mes==202006,  ccajas_extracciones   := NA ]
@@ -247,7 +330,10 @@ setwd("./exp/FE6110/")   #Establezco el Working Directory DEL EXPERIMENTO
 
 
 #corrijo los  < foto_mes, campo >  que fueron pisados con cero
-Corregir( dataset )  
+# Atencion, se debe descomentar SOLO UNO
+# Corregir_MachineLearning( dataset )  
+# Corregir_VelenPennini( dataset )
+
 
 #Comentar si no se quiera que funcione
 AgregarVariables( dataset )
@@ -261,7 +347,7 @@ cols_lagueables  <-  setdiff( colnames(dataset), c("numero_de_cliente", "foto_me
 #  es MUY  importante esta linea
 setorder( dataset, numero_de_cliente, foto_mes )
 
-#creo los campos lags
+#creo los campos lags de orden 1
 dataset[ , paste0( cols_lagueables, "_lag1") := shift(.SD, 1, NA, "lag"), 
            by= numero_de_cliente, 
            .SDcols= cols_lagueables ]
