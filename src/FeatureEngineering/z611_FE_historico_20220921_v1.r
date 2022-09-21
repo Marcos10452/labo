@@ -137,6 +137,7 @@ AgregarVariables  <- function( dataset )
   #INICIO de la seccion donde se deben hacer cambios con variables nuevas
 
   #creo un ctr_quarter que tenga en cuenta cuando los clientes hace 3 menos meses que estan
+  #OJO, Es una forma de normalizar
   dataset[  , ctrx_quarter_normalizado := ctrx_quarter ]
   dataset[ cliente_antiguedad==1 , ctrx_quarter_normalizado := ctrx_quarter * 5 ]
   dataset[ cliente_antiguedad==2 , ctrx_quarter_normalizado := ctrx_quarter * 2 ]

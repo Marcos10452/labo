@@ -262,11 +262,15 @@ cols_lagueables  <-  setdiff( colnames(dataset), c("numero_de_cliente", "foto_me
 setorder( dataset, numero_de_cliente, foto_mes )
 
 #creo los campos lags
+#.SD= set order, .SD es el listado de los campos
+#recordar que se busca ordenado los ID de los clientes para buscar cada 
+#previo dato. Pega la fila del valor anterior porque estan ordenados.
+#Si se llega al último, se pone NULL
 dataset[ , paste0( cols_lagueables, "_lag1") := shift(.SD, 1, NA, "lag"), 
            by= numero_de_cliente, 
            .SDcols= cols_lagueables ]
 
-#agrego los delta lags
+#agrego los Delta lags
 for( vcol in cols_lagueables )
 {
   dataset[ , paste0(vcol, "_delta1") := get(vcol)  - get(paste0( vcol, "_lag1"))  ]
