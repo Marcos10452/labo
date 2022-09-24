@@ -14,25 +14,26 @@ require("lightgbm")
 
 
 
-kdataset       <- "./exp/FE6111_NA_6/dataset_6110.csv.gz"
+kdataset       <- "./datasets/competencia1_2022.csv"
 ksemilla_azar  <- 757577  #Aqui poner la propia semilla
 ktraining      <- c( 202101 )   #periodos en donde entreno
 kfuture        <- c( 202103 )   #periodo donde aplico el modelo final
 
 
-kexperimento   <- "KA6340_MOD10_NA_6"
+kexperimento   <- "KA6240"
 
 kmax_bin           <-    31
-klearning_rate     <-     0.01015484
-knum_iterations    <-   614
-knum_leaves        <-   694
-kmin_data_in_leaf  <-  2670
-kfeature_fraction  <-     0.470102
+klearning_rate     <-     0.0138590848301294
+knum_iterations    <-   264
+knum_leaves        <-   75
+kmin_data_in_leaf  <-  652
+kfeature_fraction  <-     0.777893356618017
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #Aqui empieza el programa
-setwd( "~/buckets/b1" )
+#setwd( "~/buckets/b1" )
+setwd("/home/marcos/DataScience/Curso/MdD/")
 
 #cargo el dataset donde voy a entrenar
 dataset  <- fread(kdataset, stringsAsFactors= TRUE)

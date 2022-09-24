@@ -29,10 +29,10 @@ options(error = function() {
 })
 
 
-kBO_iter  <- 200   #cantidad de iteraciones de la Optimizacion Bayesiana
+kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 # ATENCION  si NO se quiere utilizar  undersampling  se debe  usar  kundersampling <- 1.0
-kundersampling  <- 0.1   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
+kundersampling  <- 0.2   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
 
 prob_min  <- 0.5/( 1 + kundersampling*39)
 prob_max  <- pmin( 1.0, 4/( 1 + kundersampling*39) )
@@ -41,14 +41,14 @@ prob_max  <- pmin( 1.0, 4/( 1 + kundersampling*39) )
 hs <- makeParamSet( 
          makeNumericParam("learning_rate",    lower=  0.01   , upper=    0.3),
          makeNumericParam("feature_fraction", lower=  0.2    , upper=    1.0),
-         makeIntegerParam("min_data_in_leaf", lower=  0      , upper= 800),
+         makeIntegerParam("min_data_in_leaf", lower=  0      , upper= 8000),
          makeIntegerParam("num_leaves",       lower= 16L     , upper= 1024L),
          makeNumericParam("prob_corte",       lower= prob_min, upper= prob_max  )  #esto sera visto en clase en gran detalle
         )
 
-kdataset       <- "./exp/FE6110_10_NA_6/dataset_6110.csv.gz"         # El dataset generado con Feature Engineering
+kdataset       <- "./exp/FE7130/dataset_6110.csv.gz"         # El dataset generado con Feature Engineering
 ksemilla_azar  <- 757577  #Aqui poner la propia semilla
-kexperimento   <- "HT6330_10_iter200"
+kexperimento   <- "HT6331_20"
 ktraining      <- c( 202101 )   #periodos en donde entreno
 
 kPOS_ganancia  <- 78000
