@@ -9,7 +9,11 @@ require("lightgbm")
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++ VARIABLES ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#"~/buckets/b1/"   #Establezco el Working Directory
+
+#kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
+#kdirectortiodataset<-"./exp/FE7130/dataset_7130.csv.gz"   #Directorio de dataset y archivo datase
+#kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
+#kexperimento   <- "M1-testganancia_100%"                       #Nombre del experimiento
 
 kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
 kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
@@ -31,13 +35,13 @@ kfuture        <- c( 202103 )   #periodo donde aplico el modelo final
 
 #1531	TRUE	999983	0.010253295899519	0.229763939138759	7093	285	0.020169638283811	25740000	84
 #................... Hiperparametros....................
-knum_iterations    <-   1531
+knum_iterations    <-   873
 kmax_bin           <-    31
-klearning_rate     <-     0.010253295899519
-kfeature_fraction  <-  0.229763939138759
-kmin_data_in_leaf  <-  4
-knum_leaves        <-   2
-kprob_corte        <-  0.020169638283811
+klearning_rate     <-     0.0207719898579169
+kfeature_fraction  <-  0.84789114356653
+kmin_data_in_leaf  <-  6714
+knum_leaves        <-   267
+kprob_corte        <-  0.0327131986372104
 #......................................................
 #<<<<<<<<<<<<<<<<<<<<<<<Normalización hp>>>>>>>>>>>>>>>
 
