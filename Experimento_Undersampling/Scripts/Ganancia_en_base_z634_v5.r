@@ -10,18 +10,18 @@ require("lightgbm")
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++ VARIABLES ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
-kdirectortiodataset<-"./exp/FE7130/dataset_7130.csv.gz"   #Directorio de dataset y archivo datase
-kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
-kexperimento   <- "M2-testganancia_30%_iter110"                       #Nombre del experimiento
+#kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
+#kdirectortiodataset<-"./exp/FE7130/dataset_7130.csv.gz"   #Directorio de dataset y archivo datase
+#kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
+#kexperimento   <- "M1-testganancia_100%"                       #Nombre del experimiento
 
-#kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
-#kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
-#kdirectortioexp<-"./labo/Experimento_Undersampling/exp/"  #Directorio donde queda el experimiento
-#kexperimento   <- "testganancia_80"                       #Nombre del experimiento
+kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
+kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
+kdirectortioexp<-"./labo/Experimento_Undersampling/exp/"  #Directorio donde queda el experimiento
+kexperimento   <- "testganancia_80"                       #Nombre del experimiento
 
 # ATENCION  si NO se quiere utilizar  undersampling  se debe  usar  kundersampling <- 1.0
-kundersampling  <-0.3   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
+kundersampling  <-1.0   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
 
 
 #Vector semilla
@@ -33,27 +33,15 @@ ktraining      <- c( 202101 )   #periodos en donde entreno
 kfuture        <- c( 202103 )   #periodo donde aplico el modelo final
 
 
-#873	TRUE	762101	0.020771989857917	0.84789114356653	6714	267	0.03271319863721	26142000	119
-#714	TRUE	762101	0.031721098580096	0.781037448186109	2761	39	0.029377818243349	27774000	110
-
-
-#855	TRUE	762101	0.011872305762525	0.407138791827417	1002	980	0.02731421712763	28772000	102
+#1531	TRUE	999983	0.010253295899519	0.229763939138759	7093	285	0.020169638283811	25740000	84
 #................... Hiperparametros....................
-knum_iterations    <-   714
+knum_iterations    <-   873
 kmax_bin           <-    31
-klearning_rate     <-     0.031721098580096
-kfeature_fraction  <-  0.781037448186109
-kmin_data_in_leaf  <-  2761
-knum_leaves        <-   39
-kprob_corte        <- 0.029377818243349
-
-#knum_iterations    <-   855
-#kmax_bin           <-    31
-#klearning_rate     <-     0.011872305762525
-#kfeature_fraction  <-  0.407138791827417
-#kmin_data_in_leaf  <-  1002
-#knum_leaves        <-   980
-#kprob_corte        <- 0.02731421712763
+klearning_rate     <-     0.0207719898579169
+kfeature_fraction  <-  0.84789114356653
+kmin_data_in_leaf  <-  6714
+knum_leaves        <-   267
+kprob_corte        <-  0.0327131986372104
 #......................................................
 #<<<<<<<<<<<<<<<<<<<<<<<Normalización hp>>>>>>>>>>>>>>>
 
@@ -148,7 +136,7 @@ EstimarGanancia_lightgbm  <- function( x, ksemilla_azar )
                        stratified= TRUE, #sobre el cross validation (estratificar los datos)
                        nfold= kfolds,    #folds del cross validation
                        param= param_completo,
-                       verbose= -100
+                       verbose= 100
                       )
 
   #obtengo la ganancia
@@ -212,8 +200,7 @@ dataset[ foto_mes %in% ktraining, clase01 := ifelse( clase_ternaria=="CONTINUA",
 #los campos que se van a utilizar
 campos_buenos  <- setdiff( colnames(dataset), c("clase_ternaria","clase01", "azar", "training" ) )
 
-#Dejo esta semilla porque es para el azar para la dist. uniforme ????
-set.seed(999983 )
+set.seed( vsemilla_azar[i] )
 
 #Se genera la columna "azar" en el dataset
 #runif(n) generates n uniform random numbers between 0 and 1.
@@ -245,7 +232,6 @@ dtrain  <- lgb.Dataset( data= data.matrix(  dataset[ training == 1L, campos_buen
                         label= dataset[ training == 1L, clase01 ],
                         weight=  dataset[ training == 1L, ifelse( clase_ternaria=="BAJA+2", 1.0000002, ifelse( clase_ternaria=="BAJA+1",  1.0000001, 1.0) )],
                         free_raw_data= FALSE  )
-
 
 
 

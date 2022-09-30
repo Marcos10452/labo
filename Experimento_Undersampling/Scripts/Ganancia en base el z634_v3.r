@@ -7,69 +7,45 @@ require("rlist")
 
 require("lightgbm")
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#+++++++++++++++++++++++++++++++++++++ VARIABLES ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
-kdirectortiodataset<-"./exp/FE7130/dataset_7130.csv.gz"   #Directorio de dataset y archivo datase
-kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
-kexperimento   <- "M2-testganancia_30%_iter110"                       #Nombre del experimiento
+#"~/buckets/b1/"   #Establezco el Working Directory
 
-#kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
-#kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
-#kdirectortioexp<-"./labo/Experimento_Undersampling/exp/"  #Directorio donde queda el experimiento
-#kexperimento   <- "testganancia_80"                       #Nombre del experimiento
+kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/"
+kexperimento   <- "testganancia_80"
+kdirectortioexp<-"./Experimento_Undersampling/exp/"
+
 
 # ATENCION  si NO se quiere utilizar  undersampling  se debe  usar  kundersampling <- 1.0
-kundersampling  <-0.3   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
+kundersampling  <-1.0   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
 
 
-#Vector semilla
+
 vsemilla_azar  <- c(757577, 333563, 135719, 101009, 531143)  #Aqui poner la propia semilla
 #vsemilla_azar  <- c(7575773)  #Aqui poner la propia semilla
 
-#Mes que se corre
+
 ktraining      <- c( 202101 )   #periodos en donde entreno
 kfuture        <- c( 202103 )   #periodo donde aplico el modelo final
 
 
-#873	TRUE	762101	0.020771989857917	0.84789114356653	6714	267	0.03271319863721	26142000	119
-#714	TRUE	762101	0.031721098580096	0.781037448186109	2761	39	0.029377818243349	27774000	110
+#1531	TRUE	999983	0.010253295899519	0.229763939138759	7093	285	0.020169638283811	25740000	84
 
-
-#855	TRUE	762101	0.011872305762525	0.407138791827417	1002	980	0.02731421712763	28772000	102
-#................... Hiperparametros....................
-knum_iterations    <-   714
+knum_iterations    <-   1531
 kmax_bin           <-    31
-klearning_rate     <-     0.031721098580096
-kfeature_fraction  <-  0.781037448186109
-kmin_data_in_leaf  <-  2761
-knum_leaves        <-   39
-kprob_corte        <- 0.029377818243349
-
-#knum_iterations    <-   855
-#kmax_bin           <-    31
-#klearning_rate     <-     0.011872305762525
-#kfeature_fraction  <-  0.407138791827417
-#kmin_data_in_leaf  <-  1002
-#knum_leaves        <-   980
-#kprob_corte        <- 0.02731421712763
-#......................................................
-#<<<<<<<<<<<<<<<<<<<<<<<Normalización hp>>>>>>>>>>>>>>>
-
-kmin_data_in_leaf<-as.integer(kmin_data_in_leaf*kundersampling)
-
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>
+klearning_rate     <-     0.010253295899519
+kfeature_fraction  <-  0.229763939138759
+kmin_data_in_leaf  <-  4
+knum_leaves        <-   2
+kprob_corte        <-  0.020169638283811
 
 kPOS_ganancia  <- 78000
 kNEG_ganancia  <- -2000
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#------------------------------------- Funciones -------------------------------------------------------------
+#------------------------------------------------------------------------------
 #graba a un archivo los componentes de lista
 #para el primer registro, escribe antes los titulos
 
-loguear  <- function( reg, arch=NA, folder=kdirectortioexp, ext=".txt", verbose=TRUE )
+loguear  <- function( reg, arch=NA, folder="./Experimento_Undersampling/exp/", ext=".txt", verbose=TRUE )
 {
   archivo  <- arch
   if( is.na(arch) )  archivo  <- paste0(  folder, substitute( reg), ext )
@@ -145,7 +121,7 @@ EstimarGanancia_lightgbm  <- function( x, ksemilla_azar )
   set.seed( ksemilla_azar )
   modelocv  <- lgb.cv( data= dtrain,
                        eval= fganancia_logistic_lightgbm,
-                       stratified= TRUE, #sobre el cross validation (estratificar los datos)
+                       stratified= TRUE, #sobre el cross validation
                        nfold= kfolds,    #folds del cross validation
                        param= param_completo,
                        verbose= -100
@@ -168,16 +144,17 @@ EstimarGanancia_lightgbm  <- function( x, ksemilla_azar )
   xx$iteracion <- GLOBAL_iteracion
   loguear( xx, arch= klog )
 
-  return( ganancia_normalizada )
+  return( ganancia )
 }
-##--------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #Aqui empieza el programa
+
 #Aqui se debe poner la carpeta de la computadora local
 setwd(kdirectoriotrabajo)
 
 #cargo el dataset donde voy a entrenar el modelo
-dataset  <- fread(kdirectortiodataset)
-#dataset<-dataset[1:3000,]
+dataset  <- fread("./datasets/competencia1_2022.csv")
+dataset<-dataset[1:3000,]
 
 #--------------------------------------
 #creo las carpetas donde van los resultados
@@ -202,90 +179,56 @@ if( file.exists(klog) )
 }
 
 
-#Aquí se crea columna clase01 donde todos los BAJA+2 y BAJA+1 se pasan a '1' y los CONTINUA a '0'
-#paso la clase a binaria que tome valores {0,1}  enteros. clase01 es binaria por eso entre '0' y '1'
+
+#paso la clase a binaria que tome valores {0,1}  enteros
 dataset[ foto_mes %in% ktraining, clase01 := ifelse( clase_ternaria=="CONTINUA", 0L, 1L) ]
 
 
-#En "campos_buenos" se ingresa el nombre de todas las variables (columnas) del dataset y 
-# luego se agregan 4 columnas adicionales "clase_ternaria","clase01", "azar"y  "training"
 #los campos que se van a utilizar
 campos_buenos  <- setdiff( colnames(dataset), c("clase_ternaria","clase01", "azar", "training" ) )
 
-#Dejo esta semilla porque es para el azar para la dist. uniforme ????
-set.seed(999983 )
-
-#Se genera la columna "azar" en el dataset
-#runif(n) generates n uniform random numbers between 0 and 1.
-# R: generate uniform randum numbers with runif(…)
-dataset[  , azar := runif( nrow( dataset ) ) ]
-# Se genera la columna training con todos valores '0'
-dataset[  , training := 0L ]
-#Acá se debe cumplir que foto_mes sea ktraining 'AND'  
-# (si azar <= al kundersampling 'OR' campo clase_ternaria es "BAJA+1" o "BAJA+2" ) se hace campo training = 1 (entero).
-dataset[ foto_mes %in% ktraining & ( azar <= kundersampling | clase_ternaria %in% c( "BAJA+1", "BAJA+2" ) ), training := 1L ]
-
-#dejo los datos en el formato que necesita LightGBM
-#data	
-#a matrix object, a dgCMatrix object, a character representing a path to a text file (CSV, TSV, or LibSVM), or a character representing a path to a binary lgb.Dataset file
-
-#label	
-#vector of labels to use as the target variable
-
-#weight	
-#numeric vector of sample weights: Aquí le dió mas "peso" a BAJA+2, luego a BAJA+1 y al final a CONINUA
-
-#free_raw_data	
-#LightGBM constructs its data format, called a "Dataset", from tabular data. By default, that Dataset object on the R side does not keep a copy of the raw 
-#data. This reduces LightGBM's memory consumption, but it means that the Dataset object cannot be changed after it has been constructed.
-#If you'd prefer to be able to change the Dataset object after construction, set free_raw_data = FALSE.
-
-
-dtrain  <- lgb.Dataset( data= data.matrix(  dataset[ training == 1L, campos_buenos, with=FALSE]),
-                        label= dataset[ training == 1L, clase01 ],
-                        weight=  dataset[ training == 1L, ifelse( clase_ternaria=="BAJA+2", 1.0000002, ifelse( clase_ternaria=="BAJA+1",  1.0000001, 1.0) )],
-                        free_raw_data= FALSE  )
 
 
 
 
-
-#Aqui se llama con los hiperparametros. Habría que 
+#Aqui se llama con los hiperparametros default
 x  <- list( "num_iterations"   = knum_iterations,
             "max_bin"          = kmax_bin,
             "learning_rate"    = klearning_rate,
             "feature_fraction" = kfeature_fraction,
-            "min_data_in_leaf" = kmin_data_in_leaf,
+            "min_data_in_leaf" = as.integer(kmin_data_in_leaf*kundersampling),
             "num_leaves"       = knum_leaves,
             "prob_corte"       = kprob_corte )
-
 gan_min=99999999
 gan_max=0
 ganacia_total=0
-
-for (i in seq_along(vsemilla_azar))
+for (semilla_azar in vsemilla_azar)
 {
-    cat( vsemilla_azar[i], " semilla elegida\n")
+    cat( semilla_azar, " semilla elegida\n")
+    set.seed( semilla_azar )
+    dataset[  , azar := runif( nrow( dataset ) ) ]
+    dataset[  , training := 0L ]
+    dataset[ foto_mes %in% ktraining & ( azar <= kundersampling | clase_ternaria %in% c( "BAJA+1", "BAJA+2" ) ), training := 1L ]
     
-    #Obtengo la ganancia estimada del 5-kfold
-    ganacia_estimada<-EstimarGanancia_lightgbm( x ,vsemilla_azar[i])
+    #dejo los datos en el formato que necesita LightGBM
+    dtrain  <- lgb.Dataset( data= data.matrix(  dataset[ training == 1L, campos_buenos, with=FALSE]),
+                            label= dataset[ training == 1L, clase01 ],
+                            weight=  dataset[ training == 1L, ifelse( clase_ternaria=="BAJA+2", 1.0000002, ifelse( clase_ternaria=="BAJA+1",  1.0000001, 1.0) )],
+                          free_raw_data= FALSE  )
   
-    #Busco el minimo valor de la ganacia generada por las semilla
+    ganacia_estimada<-EstimarGanancia_lightgbm( x ,semilla_azar)
+    #Busco el minimo valor de la ganacia generada por una semilla
     if(gan_min>ganacia_estimada) {gan_min<-ganacia_estimada}
-    #Busco el maximo  valor de la ganacia generada por las semilla
+    #Busco el maximo  valor de la ganacia generada por una semilla
     if(gan_max<ganacia_estimada) {gan_max<-ganacia_estimada}
-
-    #Acumulo las ganancias    
+    
     ganacia_total<<-ganacia_total+ganacia_estimada
-
-    #promedio de ganancias según vector de semillas
-    ganacia_promedio<-(ganacia_total/i)
-    #Imprimo
+    ganacia_promedio<-ganacia_total/length(vsemilla_azar)
     cat("\nGanacia minima: ",gan_min )
     cat("\nGanacia maxima: ",gan_max )
-    cat("\nPromedio de semillas: ", ganacia_promedio, "\n")
+    cat("\nPromedio de semillas: ", ganacia_promedio)
     
 }
 
-#lgb.create_tree_digraph (model, tree_index=0, show_info=['split_gain', 'internal_value', 'internal_count','internal_weight', 'leaf_count', 'leaf_weight', 'data_percentage'])
+
 

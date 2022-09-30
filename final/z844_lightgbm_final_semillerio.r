@@ -115,7 +115,7 @@ for( semilla  in  ksemillas )
   #acumulo el ranking de la prediccion
   tb_prediccion_semillerio[ , paste0( "pred_", semilla ) :=  prediccion ]
   tb_prediccion_semillerio[ , pred_acumulada := pred_acumulada + prediccion_semillerio ]
-
+}
 #grabo el resultado de cada modelo
 fwrite( tb_prediccion_semillerio,
         file= "tb_prediccion_semillerio.txt.gz",
