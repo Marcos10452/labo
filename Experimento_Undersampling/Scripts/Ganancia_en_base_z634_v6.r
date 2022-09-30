@@ -20,7 +20,7 @@ kexperimento   <- "M2-testganancia_30%_iter110"                       #Nombre de
 #kdirectortioexp<-"./labo/Experimento_Undersampling/exp/"  #Directorio donde queda el experimiento
 #kexperimento   <- "testganancia_80"                       #Nombre del experimiento
 
-# ATENCION  si NO se quiere utilizar  undersampling  se debe  usar  kundersampling <- 1.0
+# ATENCION  si NO se quiere utilizar  undersampling  se debe  usar  kundersampling <- 1.
 kundersampling  <-0.3   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
 
 
