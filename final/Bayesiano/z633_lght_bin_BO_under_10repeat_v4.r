@@ -1,7 +1,7 @@
 # source( "~/labo/src/lightgbm/z633_lightgbm_binaria_BO.r" )
 # Este script esta pensado para correr en Google Cloud
-#   8 vCPU
-#  64 GB memoria RAM
+#   16 vCPU
+# 256 GB memoria RAM
 # 256 GB espacio en disco
 
 # se entrena con POS =  { BAJA+1, BAJA+2 }
@@ -32,15 +32,15 @@ options(error = function() {
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++ VARIABLES ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
-#kdataset<-"./exp/FE7130/dataset_7130.csv.gz"   #Directorio de dataset y archivo datase
-#kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
-#kexperimento   <- "M1-testganancia_100%"                       #Nombre del experimiento
-
-kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
-kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
+kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
+kdirectortiodataset<-"./exp/FE8150_0929/dataset_7130.csv.gz"   #Directorio de dataset y archivo datase
 kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
-kexperimento   <- "testganancia_20"                       #Nombre del experimiento
+kexperimento   <- "K100-M2_seed1_30%"                       #Nombre del experimiento
+
+#kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
+#kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
+#kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
+#kexperimento   <- "testganancia_20"                       #Nombre del experimiento
 
 
 #Vector semilla
@@ -48,17 +48,17 @@ kexperimento   <- "testganancia_20"                       #Nombre del experimien
 ksemilla_azar  <- c(7575773)  #Aqui poner la propia semilla
 
 #Mes que se corre
-ktraining      <- c( 202101 )   #periodos en donde entreno
+ktraining      <- c( 202012,202101 )   #periodos en donde entreno
 kfuture        <- c( 202103 )   #periodo donde aplico el modelo final
 
 
 # ATENCION  si NO se quiere utilizar  undersampling  se debe  usar  kundersampling <- 1.0
-kundersampling  <- 0.1   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
+kundersampling  <- 0.3   # un undersampling de 0.1  toma solo el 10% de los CONTINUA
 
 kPOS_ganancia  <- 78000
 kNEG_ganancia  <- -2000
 
-kBO_iter  <- 1   #cantidad de iteraciones de la Optimizacion Bayesiana
+kBO_iter  <- 200   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 #................... Hiperparametros....................
 
@@ -176,7 +176,7 @@ EstimarGanancia_lightgbm  <- function( x )
                             max_bin= 31,            #por ahora, lo dejo fijo
                             num_iterations= 9999,   #un numero muy grande, lo limita early_stopping_rounds
                             force_row_wise= TRUE,   #para que los alumnos no se atemoricen con tantos warning
-                            seed= ksemilla_azar
+                            seed= semilla
                           )
   
     #el parametro discolo, que depende de otro
@@ -184,7 +184,7 @@ EstimarGanancia_lightgbm  <- function( x )
   
     param_completo  <- c( param_basicos, param_variable, x )
   
-    set.seed( ksemilla_azar )
+    set.seed( semilla )
     modelocv  <- lgb.cv( data= dtrain,
                          eval= fganancia_logistic_lightgbm,
                          stratified= TRUE, #sobre el cross validation
@@ -192,12 +192,17 @@ EstimarGanancia_lightgbm  <- function( x )
                          param= param_completo,
                          verbose= -100
                         )
+  
+    #obtengo la ganancia
+    ganancia  <- unlist(modelocv$record_evals$valid$ganancia$eval)[ modelocv$best_iter ]
+  
+    ganancia_normalizada  <-  ganancia* kfolds     #normailizo la ganancia
+    
+    cantidad_semillas_usadas <- cantidad_semillas_usadas + 1
+    
+    if (ganancia_semilla < 4400000)  break
+      
   }
-  #obtengo la ganancia
-  ganancia  <- unlist(modelocv$record_evals$valid$ganancia$eval)[ modelocv$best_iter ]
-
-  ganancia_normalizada  <-  ganancia* kfolds     #normailizo la ganancia
-
   #el lenguaje R permite asignarle ATRIBUTOS a cualquier variable
   attr(ganancia_normalizada ,"extras" )  <- list("num_iterations"= modelocv$best_iter)  #esta es la forma de devolver un parametro extra
 
