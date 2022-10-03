@@ -2,7 +2,7 @@
 #Necesita para correr en Google Cloud
 # 256 GB de memoria RAM
 # 256 GB de espacio en el disco local
-#   8 vCPU
+#   16 vCPU
 
 #---------------Version 20221002_v1---------------
 # Fila 302 se pasó a NA
@@ -42,7 +42,7 @@ kdirectorioFE         <- paste0("./exp/", kexperimento)  #Directorio donde queda
 # *************  WARNING!!!! ******************
 # Esto es para hacer pruebas rápidas. 
 # Full dataset boolreduce== FALSE
-boolreduce <- TRUE
+boolreduce <- FALSE
 end_dataset <-4000
 
 
@@ -646,7 +646,10 @@ setwd( kdirectoriotrabajo )
 dataset  <- fread( kdirectortiodataset )
 
 #This is only for test. If boolreduce==1, reduce dataset based on "end_dataset"
-if (boolreduce) datset <- dataset[1:end_dataset,]
+if (boolreduce){ 
+  print("WARNING!! -- Se selecciónió reducción del dataset --")
+  dataset <- dataset[1:end_dataset,]
+}
 
 #Elimino los campos problematicos
 dataset[  , internet := NULL ]
@@ -654,8 +657,8 @@ dataset[  , internet := NULL ]
 #creo la carpeta donde va el experimento
 # FE  representa  Feature Engineering
 dir.create( kdirectortioexp,  showWarnings = FALSE ) 
-dir.create( "./exp/FE8150_0929/", showWarnings = FALSE )
-setwd("./exp/FE8150_0929/")   #Establezco el Working Directory DEL EXPERIMENTO
+dir.create( kdirectorioFE, showWarnings = FALSE )
+setwd(kdirectorioFE)   #Establezco el Working Directory DEL EXPERIMENTO
 
 
 print("Empieza Corregir_MarchineLearning")
@@ -726,6 +729,7 @@ ncol( dataset )
 CanaritosAsesinos( canaritos_ratio = 0.2 )
 ncol( dataset )
 
+print("Grabando archivos!! ")
 #------------------------------------------------------------------------------
 #grabo el dataset
 fwrite( dataset,
