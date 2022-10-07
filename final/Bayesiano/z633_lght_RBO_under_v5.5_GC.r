@@ -43,7 +43,7 @@ options(error = function() {
 kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
 kdirectortiodataset<-"./exp/FE8150_test_20221004_v1.5/FE8150_test_20221004_v1.5.csv.gz"   #Directorio de dataset y archivo datase
 kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
-kexperimento   <- "KA6330_100-5-80-30-1_v2"                       #Nombre del experimiento
+kexperimento   <- "KA6330_100-5-80-30-1_v5.5"                       #Nombre del experimiento
 
 #kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
 #kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
