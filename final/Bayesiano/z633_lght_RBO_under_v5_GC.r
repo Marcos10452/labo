@@ -10,7 +10,7 @@
 # la probabilidad de corte es un hiperparametro
 
 #------------------------------------------------------
-# kBO_iter  <- 200   #cantidad de iteraciones de la Optimizacion Bayesiana -200
+# kBO_iter  <- 200   #cantidad de iteraciones de la Optimizacion Bayesiana -100
 # 5 Semillas                                                                -5
 # coverage 0.8                                                              -80  
 # Undersampling 0.3                                                         -30
@@ -41,9 +41,9 @@ options(error = function() {
 #+++++++++++++++++++++++++++++++++++++ VARIABLES ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
-kdirectortiodataset<-"./exp/FE8150_test_20221002_v1/FE8150_test_20221002_v1.csv.gz"   #Directorio de dataset y archivo datase
+kdirectortiodataset<-"./exp/FE8150_test_20221004_v1.5/FE8150_test_20221004_v1.5.csv.gz"   #Directorio de dataset y archivo datase
 kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
-kexperimento   <- "KA6330_200-5-80-30-1_v1"                       #Nombre del experimiento
+kexperimento   <- "KA6330_100-5-80-30-1_v2"                       #Nombre del experimiento
 
 #kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
 #kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
@@ -229,7 +229,7 @@ EstimarGanancia_lightgbm  <- function( x )
       }
   }
   
-  ganancia_normalizada  <-  (ganancia_total / (cantidad_semillas_usadas * kfolds) )  #normailizo la ganancia
+  ganancia_normalizada  <-  (ganancia_total / cantidad_semillas_usadas) * kfolds   #normailizo la ganancia
   #el lenguaje R permite asignarle ATRIBUTOS a cualquier variable
   attr(ganancia_normalizada ,"extras" )  <- list("num_iterations"= modelocv$best_iter)  #esta es la forma de devolver un parametro extra
 
