@@ -6,8 +6,10 @@
 
 #---------------Version 20221002_v2---------------
 # Fila 302 se pasó a NA
-# lags ciclo for de 6
-# canaritos_ratio = 0.4
+# lags ciclo for de 4
+#TendenciaYmuchomas ratioavg y ratiomax=  TRUE
+# canaritos_ratio = 0.4 antes del random forest
+# canaritos_ratio = 0.4 después  del random forest
 # se corrige  as.integer(ctrx_quarter * 1.2) como integer
 # Todo lo demas original.
 
@@ -29,7 +31,7 @@ require("lightgbm")
 kdirectoriotrabajo        <-"~/buckets/b1/" #Directorio de trabajo
 kdirectortiodataset       <-"./datasets/competencia1_historia_2022.csv.gz"   #Directorio de dataset y archivo datase
 kdirectortioexp           <-"./exp/"  #Directorio donde queda el experimiento
-kexperimento              <- "FE8150_test_20221005_v2"                       #Nombre del experimiento
+kexperimento              <- "FE8150_test_20221008_v2"                       #Nombre del experimiento
 kdirectorioFE             <- paste0("./exp/", kexperimento)  #Directorio donde queda el experimiento
 
 # -------------------------------------------------------------------------------------------------
@@ -682,7 +684,7 @@ cols_lagueables  <- copy(  setdiff( colnames(dataset), c("numero_de_cliente", "f
 #  es MUY  importante esta linea
 setorder( dataset, numero_de_cliente, foto_mes )
 
-for (i in 1:6){  
+for (i in 1:4){  
   #creo los campos lags de orden 1,2 y 3
   dataset[ , paste0( cols_lagueables, "_lag",i) := shift(.SD, i, NA, "lag"), 
              by= numero_de_cliente, 
@@ -706,11 +708,20 @@ TendenciaYmuchomas( dataset,
                     minimo=    FALSE,
                     maximo=    FALSE,
                     promedio=  TRUE,
-                    ratioavg=  FALSE,
-                    ratiomax=  FALSE  )
+                    ratioavg=  TRUE,
+                    ratiomax=  TRUE  )
 
+#------------------------------------------------------------------------------
+#Agrego Canaritos antes del random forest para bajar las variables antes.
+print("Termió TendenciaYmuchomas-  Empieza CanaritosAsesinos ")
 
-print("Termió TendenciaYmuchomas-  Empieza AgregaVarRandomForest ")
+ncol( dataset )
+CanaritosAsesinos( canaritos_ratio = 0.4 )
+ncol( dataset )
+
+#------------------------------------------------------------------------------
+
+print("Termió CanaritosAsesinos-  Empieza AgregaVarRandomForest ")
 #------------------------------------------------------------------------------
 #Agrego variables a partir de las hojas de un Random Forest
 
