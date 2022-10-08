@@ -67,7 +67,7 @@ kundersampling  <- 0.3   # un undersampling de 0.1  toma solo el 10% de los CONT
 kPOS_ganancia  <- 78000
 kNEG_ganancia  <- -2000
 
-kBO_iter  <- 200   #cantidad de iteraciones de la Optimizacion Bayesiana
+kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 #................... Hiperparametros....................
 
