@@ -43,7 +43,7 @@ options(error = function() {
 kdirectoriotrabajo<-"~/buckets/b1/" #Directorio de trabajo
 kdirectortiodataset<-"./exp/FE8150_test_20221008_v1.8/FE8150_test_20221008_v1.8.csv.gz"   #Directorio de dataset y archivo datase
 kdirectortioexp<-"./exp/"  #Directorio donde queda el experimiento
-kexperimento   <- "KA6330_100-5-80-20-3_6"                       #Nombre del experimiento
+kexperimento   <- "KA6330_100-5-80-20-3_v6"                       #Nombre del experimiento
 
 #kdirectoriotrabajo<-"/home/marcos/DataScience/Curso/MdD/" #Directorio de trabajo
 #kdirectortiodataset<-"./datasets/competencia1_2022.csv"   #Directorio de dataset y archivo datase
@@ -223,7 +223,7 @@ EstimarGanancia_lightgbm  <- function( x )
     
    
     
-    if (ganancia_semilla < 4400000)
+    if (ganancia_semilla < 13000000)
       {
         break
       }
