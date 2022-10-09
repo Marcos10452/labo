@@ -13,7 +13,7 @@
 # kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana -100
 # 5 Semillas                                                                -5
 # coverage 0.8                                                              -80  
-# Undersampling 0.3                                                         -20
+# Undersampling 0.2                                                         -20
 # Months = 3                                                                -3
 
 
