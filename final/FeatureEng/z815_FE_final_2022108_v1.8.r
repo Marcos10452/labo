@@ -29,7 +29,7 @@ require("lightgbm")
 kdirectoriotrabajo        <-"~/buckets/b1/" #Directorio de trabajo
 kdirectortiodataset       <-"./datasets/competencia1_historia_2022.csv.gz"   #Directorio de dataset y archivo datase
 kdirectortioexp           <-"./exp/"  #Directorio donde queda el experimiento
-kexperimento              <- "FE8150_test_20221008_v2"                       #Nombre del experimiento
+kexperimento              <- "FE8150_test_20221008_v1.8"                       #Nombre del experimiento
 kdirectorioFE             <- paste0("./exp/", kexperimento)  #Directorio donde queda el experimiento
 
 # -------------------------------------------------------------------------------------------------
