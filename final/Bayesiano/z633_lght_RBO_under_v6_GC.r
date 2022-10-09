@@ -1,7 +1,7 @@
 # source( "~/labo/src/lightgbm/z633_lightgbm_binaria_BO.r" )
 # Este script esta pensado para correr en Google Cloud
 #   24 vCPU
-# 64 GB memoria RAM
+# 96 GB memoria RAM
 # 256 GB espacio en disco
 
 # se entrena con POS =  { BAJA+1, BAJA+2 }
